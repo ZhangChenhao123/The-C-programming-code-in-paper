@@ -1,0 +1,91 @@
+#include <stdio.h>
+#include <stdlib.h>
+#include <string.h>
+#include <math.h> 
+
+void get_two_dimension(char* line, double** data, char *filename);
+double print_two_dimension(double** data, int row, int col);
+int get_row(char *filename);
+int get_col(char *filename);
+void get_two_dimension(char* line, double** data, char *filename)
+{
+	FILE* stream = fopen(filename, "r");
+	int i = 0;
+	while (fgets(line, 1024, stream))//逐行读取
+    {
+    	int j = 0;
+    	char *tok;
+        char* tmp = strdup(line);
+        for (tok = strtok(line, ","); tok && *tok; j++, tok = strtok(NULL, ",\n")){
+        	data[i][j] = atoi(tok);//转换成浮点数 
+		}//字符串拆分操作 
+        i++;
+        free(tmp);
+    }
+    fclose(stream);//文件打开后要进行关闭操作
+}
+
+double print_two_dimension(double** data, int row, int col)
+{
+	double sum; 
+	int i, j;
+	for(i=1; i<row; i++)
+	{
+		sum = sum +( 1 /(1+exp(-(-0.35+0.14*data[i][0]+0.45*data[i][1]+0.27*data[i][2]+0.19*data[i][3]-0.33*data[i][4]-0.23*data[i][5]-0.12*data[i][6]+0.33*data[i][7]+0.17*data[i][8]))));
+		
+	}
+	printf("根据所给数据，估算得到的小汽车N3的值为%.3lf，即%.dpcu",0.71*sum,int(0.71*sum+0.5));
+	printf("\n");
+	printf("同时根据转换关系，N4=0.074J-0.104N3，得到公交车N3的值为%.3lf，即%.dpcu",74-0.104*0.71*sum,int(74-0.104*0.71*sum+0.5));
+	printf("\n");
+}
+
+int get_row(char *filename)
+{
+	char line[1024];
+	int i = 0;
+	FILE* stream = fopen(filename, "r");
+	while(fgets(line, 1024, stream)){
+		i++;
+	}
+	fclose(stream);
+	return i;
+}
+
+int get_col(char *filename)
+{
+	char line[1024];
+	int i = 0;
+	FILE* stream = fopen(filename, "r");
+	fgets(line, 1024, stream);
+	char* token = strtok(line, ",");
+	while(token){
+		token = strtok(NULL, ",");
+		i++;
+	}
+	fclose(stream);
+	return i;
+}
+int main()
+{
+	char filename[] = "C:\\问卷数据.csv";//所要打开的文件名称
+    char line[1024];
+    double **data;
+    int row, col;
+    row = get_row(filename);
+    col = get_col(filename);
+    //动态申请二维数组 
+    data = (double **)malloc(row * sizeof(int *));
+	for (int i = 0; i < row;++i)
+	{
+		data[i] = (double *)malloc(col * sizeof(double));
+	}//动态申请二维数组 
+	get_two_dimension(line, data, filename);
+	printf("使用机动车的出行者数量J = %d\n", row);
+	printf("方式选择概率模型中自变量数量= %d\n", col);
+	print_two_dimension(data, row, col);
+	
+	system("pause");
+}
+
+
